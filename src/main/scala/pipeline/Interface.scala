@@ -46,8 +46,7 @@ class DsToEsData extends Bundle {
 class DsToAluBus extends Bundle {
   val src1 = Output(UInt(32.W))
   val src2 = Output(UInt(32.W))
-//  val aluop = Output(Vec(12, Bool()))
-  val aluop = Output(UInt(12.W))
+  val aluop = Output(Vec(12, Bool()))
   val res = Input(UInt(32.W))
 }
 
