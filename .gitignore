@@ -1,1 +1,4 @@
-!src
+/*
+!src/
+!build.sbt
+!.gitignore
