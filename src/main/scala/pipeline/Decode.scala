@@ -1,12 +1,14 @@
 package pipeline
 
 import chisel3._
+import funcunit._
 
 class Decode extends Module {
   // Interface
   val fs2ds_bus = IO(Flipped(new FsToDsBus))
   val ds2es_bus = IO(new DsToEsBus)
   val ds2alu_bus = IO(new DsToAluBus)
+  val rf_read = IO(Flipped(new RFRead))
 
   // Stage Control
   val valid = RegInit(false.B)
@@ -39,6 +41,9 @@ class Decode extends Module {
   ds2alu_bus.aluop(10) := inst_add_w
   ds2alu_bus.aluop(11) := inst_add_w
 
+  rf_read.raddr(0) := "b00000".U(5.W)
+  rf_read.raddr(1) := "b00000".U(5.W)
+
   ds_ready_go := true.B
   when (fs2ds_bus.ds_allowin) {
     valid := fs2ds_bus.fs_valid
@@ -48,5 +53,10 @@ class Decode extends Module {
     data := fs2ds_bus.data
   }
 
-  inst_add_w := fs2ds_bus.data.inst(1, 0) === 2.U
+  inst_add_w := fs2ds_bus.data.inst(31, 26) === 0.U &&
+    fs2ds_bus.data.inst(25, 24) === 0.U &&
+    fs2ds_bus.data.inst(23, 22) === 0.U &&
+    fs2ds_bus.data.inst(21, 20) === 1.U &&
+    fs2ds_bus.data.inst(19, 18) === 0.U &&
+    fs2ds_bus.data.inst(17, 15) === 0.U
 }
