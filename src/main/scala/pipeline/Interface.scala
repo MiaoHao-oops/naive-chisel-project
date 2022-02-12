@@ -41,15 +41,9 @@ class FsToDsBus extends Bundle {
 class DsToEsData extends Bundle {
   val pc = Output(UInt(32.W))
   val dest = Output(UInt(5.W))
-  val res = Output(UInt(32.W))
-  val req_mem = Output(Bool())
-}
-
-class DsToAluBus extends Bundle {
-  val src1 = Output(UInt(32.W))
-  val src2 = Output(UInt(32.W))
+  val src = Output(Vec(2, UInt(32.W)))
   val aluop = Output(Vec(12, Bool()))
-  val res = Input(UInt(32.W))
+  val req_mem = Output(Bool())
 }
 
 class DsToEsBus extends Bundle {

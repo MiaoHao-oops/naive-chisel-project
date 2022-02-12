@@ -14,8 +14,8 @@ class RegFile extends Module {
   }
 
   for (i <- 0 to 1) {
-    when (read_channel.raddr(i) === "h0".U(5.W)) {
-      read_channel.rdata(i) := "h0".U(32.W)
+    when (read_channel.raddr(i) === 0.U) {
+      read_channel.rdata(i) := 0.U
     } otherwise {
       read_channel.rdata(i) := regs(read_channel.raddr(i))
     }

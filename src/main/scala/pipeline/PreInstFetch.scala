@@ -14,14 +14,14 @@ class PreInstFetch extends Module {
   val pfs_ready_go = Wire(Bool())
 
   // Stage Register
-  val data = RegInit("h1bff_fffc".U(32.W))
+  val data = RegInit("h1bff_fffc".U)
 
   pfs2fs_bus.pfs_valid := valid & pfs_ready_go
   pfs2fs_bus.data.pc := data
   sram_req.en := to_pfs_valid & pfs_allowin
-  sram_req.wen := "h0".U(4.W)
+  sram_req.wen := 0.U
   sram_req.addr := data
-  sram_req.wdata := "h0000_0000".U(32.W)
+  sram_req.wdata := 0.U
 
   to_pfs_valid := true.B
   pfs_allowin := ~valid | pfs_ready_go & pfs2fs_bus.fs_allowin
