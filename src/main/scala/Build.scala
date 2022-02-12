@@ -6,6 +6,6 @@ import funcunit._
 object Build extends App {
   //  println(getVerilogString(new InstFetch))
   println("Generating Verilog Code")
-  (new ChiselStage).emitVerilog(new RegFile, Array("--target-dir", "build"))
+  (new ChiselStage).emitVerilog(new Decode, Array("--target-dir", "build"))
   println("Done")
 }

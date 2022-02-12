@@ -25,6 +25,8 @@ class Decode extends Module {
   ds2es_bus.ds_valid := valid & ds_ready_go
   ds2es_bus.data.pc := data.pc
   ds2es_bus.data.dest := "h0".U(5.W)
+  ds2es_bus.data.res := ds2alu_bus.res
+  ds2es_bus.data.req_mem := false.B
 
   ds2alu_bus.src1 := "h0".U(32.W)
   ds2alu_bus.src2 := "h0".U(32.W)
