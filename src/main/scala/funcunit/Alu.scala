@@ -9,18 +9,11 @@ class Alu extends Module {
 
   val res = Wire(Vec(12, UInt(32.W)))
 
+  for (i <- 0 to 11) {
+    res(i) := 0.U
+  }
+
   res(0) := io.src(0) + io.src(1)
-  res(1) := io.src(0) - io.src(1)
-  res(2) := io.src(0) & io.src(1)
-  res(3) := io.src(0) | io.src(1)
-  res(4) := io.src(0) ^ io.src(1)
-  res(5) := ~(io.src(0) | io.src(1))
-  res(6) := io.src(0) + io.src(1)
-  res(7) := io.src(0) + io.src(1)
-  res(8) := io.src(0) + io.src(1)
-  res(9) := io.src(0) + io.src(1)
-  res(10) := io.src(0) + io.src(1)
-  res(11) := io.src(0) + io.src(1)
 
   io.res := Mux1H(io.aluop, res)
 }

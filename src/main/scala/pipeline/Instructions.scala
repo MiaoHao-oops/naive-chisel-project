@@ -1,0 +1,8 @@
+package pipeline
+
+import chisel3._
+import chisel3.util._
+
+object Instructions {
+  def ADD_W = BitPat("b000000 00 00 01 00 000 ????? ????? ?????")
+}

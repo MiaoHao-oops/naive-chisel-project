@@ -1,7 +1,9 @@
 package pipeline
 
 import chisel3._
+import chisel3.util._
 import funcunit._
+import Instructions._
 
 class Decode extends Module {
   // Interface
@@ -17,46 +19,44 @@ class Decode extends Module {
   val data = Reg(new FsToDsData)
 
   // Functional Part
-  val inst_add_w = Wire(Bool())
+  val inst = fs2ds_bus.data.inst
+  val rd = inst(4, 0)
+  val rj = inst(9, 5)
+  val rk = inst(14, 10)
+  val ra = inst(19, 15)
+  val si12 = Cat(Fill(20, inst(21)), inst(21, 10))
+  val ui12 = Cat(Fill(20, 0.U(1.W)), inst(21, 10))
+  val inst_add_w = WireInit(false.B)
 
+  // Interface Implement
   fs2ds_bus.ds_allowin := ~valid | ds_ready_go & ds2es_bus.es_allowin
 
   ds2es_bus.ds_valid := valid & ds_ready_go
   ds2es_bus.data.pc := data.pc
-  ds2es_bus.data.dest := 0.U
+  ds2es_bus.data.dest := rd
   ds2es_bus.data.req_mem := false.B
+  ds2es_bus.data.src(0) := rf_read.raddr(0)
+  ds2es_bus.data.src(1) := rf_read.raddr(1)
+  for (i <- 0 to 11) {
+    ds2es_bus.data.aluop(i) := false.B
+  }
 
-  ds2es_bus.data.src(0) := 0.U
-  ds2es_bus.data.src(1) := 0.U
-  ds2es_bus.data.aluop(0) := inst_add_w
-  ds2es_bus.data.aluop(1) := inst_add_w
-  ds2es_bus.data.aluop(2) := inst_add_w
-  ds2es_bus.data.aluop(3) := inst_add_w
-  ds2es_bus.data.aluop(4) := inst_add_w
-  ds2es_bus.data.aluop(5) := inst_add_w
-  ds2es_bus.data.aluop(6) := inst_add_w
-  ds2es_bus.data.aluop(7) := inst_add_w
-  ds2es_bus.data.aluop(8) := inst_add_w
-  ds2es_bus.data.aluop(9) := inst_add_w
-  ds2es_bus.data.aluop(10) := inst_add_w
-  ds2es_bus.data.aluop(11) := inst_add_w
+  rf_read.raddr(0) := rk
+  rf_read.raddr(1) := rj
 
-  rf_read.raddr(0) := 0.U
-  rf_read.raddr(1) := 0.U
-
+  // Stage Control Implement
   ds_ready_go := true.B
   when (fs2ds_bus.ds_allowin) {
     valid := fs2ds_bus.fs_valid
   }
 
+  // Stage Register Implement
   when (fs2ds_bus.fs_valid && fs2ds_bus.ds_allowin) {
     data := fs2ds_bus.data
   }
 
-  inst_add_w := fs2ds_bus.data.inst(31, 26) === 0.U &&
-    fs2ds_bus.data.inst(25, 24) === 0.U &&
-    fs2ds_bus.data.inst(23, 22) === 0.U &&
-    fs2ds_bus.data.inst(21, 20) === 1.U &&
-    fs2ds_bus.data.inst(19, 18) === 0.U &&
-    fs2ds_bus.data.inst(17, 15) === 0.U
+  // Functional Part Implement
+  when (inst === ADD_W) {
+    ds2es_bus.data.aluop(0) := true.B
+  }
 }
