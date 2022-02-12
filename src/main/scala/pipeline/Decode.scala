@@ -7,7 +7,6 @@ class Decode extends Module {
   // Interface
   val fs2ds_bus = IO(Flipped(new FsToDsBus))
   val ds2es_bus = IO(new DsToEsBus)
-  val ds2alu_bus = IO(new DsToAluBus)
   val rf_read = IO(Flipped(new RFRead))
 
   // Stage Control
@@ -24,27 +23,26 @@ class Decode extends Module {
 
   ds2es_bus.ds_valid := valid & ds_ready_go
   ds2es_bus.data.pc := data.pc
-  ds2es_bus.data.dest := "h0".U(5.W)
-  ds2es_bus.data.res := ds2alu_bus.res
+  ds2es_bus.data.dest := 0.U
   ds2es_bus.data.req_mem := false.B
 
-  ds2alu_bus.src1 := "h0".U(32.W)
-  ds2alu_bus.src2 := "h0".U(32.W)
-  ds2alu_bus.aluop(0) := inst_add_w
-  ds2alu_bus.aluop(1) := inst_add_w
-  ds2alu_bus.aluop(2) := inst_add_w
-  ds2alu_bus.aluop(3) := inst_add_w
-  ds2alu_bus.aluop(4) := inst_add_w
-  ds2alu_bus.aluop(5) := inst_add_w
-  ds2alu_bus.aluop(6) := inst_add_w
-  ds2alu_bus.aluop(7) := inst_add_w
-  ds2alu_bus.aluop(8) := inst_add_w
-  ds2alu_bus.aluop(9) := inst_add_w
-  ds2alu_bus.aluop(10) := inst_add_w
-  ds2alu_bus.aluop(11) := inst_add_w
+  ds2es_bus.data.src(0) := 0.U
+  ds2es_bus.data.src(1) := 0.U
+  ds2es_bus.data.aluop(0) := inst_add_w
+  ds2es_bus.data.aluop(1) := inst_add_w
+  ds2es_bus.data.aluop(2) := inst_add_w
+  ds2es_bus.data.aluop(3) := inst_add_w
+  ds2es_bus.data.aluop(4) := inst_add_w
+  ds2es_bus.data.aluop(5) := inst_add_w
+  ds2es_bus.data.aluop(6) := inst_add_w
+  ds2es_bus.data.aluop(7) := inst_add_w
+  ds2es_bus.data.aluop(8) := inst_add_w
+  ds2es_bus.data.aluop(9) := inst_add_w
+  ds2es_bus.data.aluop(10) := inst_add_w
+  ds2es_bus.data.aluop(11) := inst_add_w
 
-  rf_read.raddr(0) := "b00000".U(5.W)
-  rf_read.raddr(1) := "b00000".U(5.W)
+  rf_read.raddr(0) := 0.U
+  rf_read.raddr(1) := 0.U
 
   ds_ready_go := true.B
   when (fs2ds_bus.ds_allowin) {
