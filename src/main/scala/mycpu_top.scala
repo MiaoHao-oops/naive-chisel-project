@@ -32,7 +32,11 @@ class mycpu_top extends Module {
     ms.rf_write <> rf.write_channel
 
     // Sram Interface
-    es.data_sram <> data_sram
+    data_sram.en := es.data_sram_req.en
+    data_sram.wen := es.data_sram_req.wen
+    data_sram.addr := es.data_sram_req.addr
+    data_sram.wdata := es.data_sram_req.wdata
+    ms.data_sram_res.rdata := data_sram.rdata
     fs.inst_sram <> inst_sram
 
     // Debug Interface

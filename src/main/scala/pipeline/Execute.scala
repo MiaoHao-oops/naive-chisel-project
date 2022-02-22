@@ -9,7 +9,7 @@ class Execute extends Module{
   val ds2es_bus = IO(Flipped(new DsToEsBus))
   val es2ms_bus = IO(new EsToMsBus)
   val es2bc_bus = IO(new EsToBcBus)
-  val data_sram = IO(new SramInterface)
+  val data_sram_req = IO(new SramReq)
 
   // Stage Control
   val valid = RegInit(false.B)
@@ -26,20 +26,21 @@ class Execute extends Module{
   es2ms_bus.data.pc := data.pc
   es2ms_bus.data.rf.wen := Fill(4, data.rf_wen)
   es2ms_bus.data.rf.wnum := data.rf_wnum
-  es2ms_bus.data.rf.wdata := Mux(data.req_mem, data_sram.rdata, alu.io.alu_result)
+  es2ms_bus.data.rf.wdata := alu.io.alu_result
+  es2ms_bus.data.req_mem := data.req_mem
 
-  es2bc_bus.data.offset := data.br_offset
-  es2bc_bus.data.cond.result := alu.io.alu_result
-  es2bc_bus.data.cond.carryout := alu.io.alu_carryout
-  es2bc_bus.data.cond.overflow := alu.io.alu_overflow
-  es2bc_bus.data.cond.zero := alu.io.alu_zero
+  es2bc_bus.data.br_offset := data.br_offset
+  es2bc_bus.data.br_cond.result := alu.io.alu_result
+  es2bc_bus.data.br_cond.carryout := alu.io.alu_carryout
+  es2bc_bus.data.br_cond.overflow := alu.io.alu_overflow
+  es2bc_bus.data.br_cond.zero := alu.io.alu_zero
   es2bc_bus.data.br_type := data.br_type
   es2bc_bus.data.valid := valid
 
-  data_sram.en := data.req_mem
-  data_sram.wen := 0.U
-  data_sram.addr := alu.io.mem_addr_result
-  data_sram.wdata := 0.U
+  data_sram_req.en := data.req_mem && valid
+  data_sram_req.wen := Mux(data.ld_st_type(1), "b1111".U, 0.U)
+  data_sram_req.addr := alu.io.mem_addr_result
+  data_sram_req.wdata := data.br_offset
 
   /* Stage Control Implement */
   es_ready_go := true.B

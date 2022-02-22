@@ -2,21 +2,28 @@ package pipeline
 
 import chisel3._
 import funcunit._
+import funcunit.BranchControl._
+import funcunit.LdStControl._
 
 // sram insterface
-trait SramReq extends Bundle {
+class SramReq extends Bundle {
   val en = Output(Bool())
   val wen = Output(UInt(4.W))
   val addr = Output(UInt(32.W))
   val wdata = Output(UInt(32.W))
 }
 
-trait SramRes extends Bundle {
+class SramRes extends Bundle {
   val rdata = Input(UInt(32.W))
 }
 
-class SramInterface extends Bundle with SramReq with SramRes
-
+class SramInterface extends Bundle {
+  val en = Output(Bool())
+  val wen = Output(UInt(4.W))
+  val addr = Output(UInt(32.W))
+  val wdata = Output(UInt(32.W))
+  val rdata = Input(UInt(32.W))
+}
 // inst-fetch and decode
 class FsToDsData extends Bundle {
   val pc = Output(UInt(32.W))
@@ -41,8 +48,10 @@ class DsToEsData extends Bundle {
   val aluop = Output(Vec(12, Bool()))
 
   // inst-type
-  val br_type = Output(Vec(1, Bool()))
+  val br_type = Output(Vec(NR_BR_INST.id, Bool()))
   val br_offset = Output(UInt(32.W))
+
+  val ld_st_type = Output(Vec(NR_LD_ST_INST.id, Bool()))
 
   // Sram Interface
   val req_mem = Output(Bool())
@@ -65,9 +74,8 @@ class DsToBcBus extends Bundle {
 // execute and memory
 class EsToMsData extends Bundle {
   val pc = Output(UInt(32.W))
-
-  // RF Interface
   val rf = new FlippedRFWrite
+  val req_mem = Output(Bool())
 }
 
 class EsToMsBus extends Bundle {
@@ -78,14 +86,14 @@ class EsToMsBus extends Bundle {
 
 class EsToBcData extends Bundle {
 //  val pc = Output(UInt(32.W))
-  val offset = Output(UInt(32.W))
-  val cond = new Bundle() {
+  val br_offset = Output(UInt(32.W))
+  val br_cond = new Bundle() {
     val result = Output(UInt(32.W))
     val carryout = Output(Bool())
     val overflow = Output(Bool())
     val zero = Output(Bool())
   }
-  val br_type = Output(Vec(1, Bool()))
+  val br_type = Output(Vec(NR_BR_INST.id, Bool()))
   val valid = Output(Bool())
 }
 
