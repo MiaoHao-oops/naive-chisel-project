@@ -3,6 +3,10 @@ package funcunit
 import chisel3._
 import pipeline._
 
+object BranchControl {
+  val TYPE_BEQ = 0
+}
+
 class BranchControl extends RawModule{
   val ds2bc_bus = IO(Flipped(new DsToBcBus))
   val es2bc_bus = IO(Flipped(new EsToBcBus))

@@ -34,6 +34,21 @@ import pipeline._
 //  io.overflow := false.B
 //}
 
+object Alu {
+  val OP_ADD = 0
+  val OP_SUB = 1
+  val OP_AND = 2
+  val OP_NOR = 3
+  val OP_OR  = 4
+  val OP_XOR = 5
+  val OP_SLT = 6
+  val OP_SLTU= 7
+  val OP_SLL = 8
+  val OP_SRA = 9
+  val OP_SRL = 10
+  val OP_LUI = 11
+}
+
 class Alu extends BlackBox {
   val io = IO(new Bundle() {
     val alu_src1 = Input(UInt(32.W))
