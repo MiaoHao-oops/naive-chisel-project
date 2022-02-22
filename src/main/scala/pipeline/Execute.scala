@@ -6,9 +6,9 @@ import funcunit._
 
 class Execute extends Module{
   // Interface
-  val ds2esbus = IO(Flipped(new DsToEsBus))
-  val es2msbus = IO(new EsToMsBus)
-  val es2bcbus = IO(new EsToBcBus)
+  val ds2es_bus = IO(Flipped(new DsToEsBus))
+  val es2ms_bus = IO(new EsToMsBus)
+  val es2bc_bus = IO(new EsToBcBus)
   val data_sram = IO(new SramInterface)
 
   // Stage Control
@@ -20,20 +20,21 @@ class Execute extends Module{
   val alu = Module(new Alu)
 
   /* Interface */
-  ds2esbus.es_allowin := !valid || es_ready_go && es2msbus.ms_allowin
+  ds2es_bus.es_allowin := !valid || es_ready_go && es2ms_bus.ms_allowin
 
-  es2msbus.es_valid := valid && es_ready_go
-  es2msbus.data.pc := data.pc
-  es2msbus.data.rf.wen := Fill(4, data.rf_wen)
-  es2msbus.data.rf.wnum := data.rf_wnum
-  es2msbus.data.rf.wdata := Mux(data.req_mem, data_sram.rdata, alu.io.alu_result)
+  es2ms_bus.es_valid := valid && es_ready_go
+  es2ms_bus.data.pc := data.pc
+  es2ms_bus.data.rf.wen := Fill(4, data.rf_wen)
+  es2ms_bus.data.rf.wnum := data.rf_wnum
+  es2ms_bus.data.rf.wdata := Mux(data.req_mem, data_sram.rdata, alu.io.alu_result)
 
-  es2bcbus.data.pc := data.pc
-  es2bcbus.data.offset := data.src(1)
-  es2bcbus.data.cond.result := alu.io.alu_result
-  es2bcbus.data.cond.carryout := alu.io.alu_carryout
-  es2bcbus.data.cond.overflow := alu.io.alu_overflow
-  es2bcbus.data.br_type := data.br_type
+  es2bc_bus.data.offset := data.br_offset
+  es2bc_bus.data.cond.result := alu.io.alu_result
+  es2bc_bus.data.cond.carryout := alu.io.alu_carryout
+  es2bc_bus.data.cond.overflow := alu.io.alu_overflow
+  es2bc_bus.data.cond.zero := alu.io.alu_zero
+  es2bc_bus.data.br_type := data.br_type
+  es2bc_bus.data.valid := valid
 
   data_sram.en := data.req_mem
   data_sram.wen := 0.U
@@ -42,12 +43,12 @@ class Execute extends Module{
 
   /* Stage Control Implement */
   es_ready_go := true.B
-  when (ds2esbus.es_allowin) {
-    valid := ds2esbus.ds_valid
+  when (ds2es_bus.es_allowin) {
+    valid := ds2es_bus.ds_valid
   }
 
-  when (ds2esbus.ds_valid && ds2esbus.es_allowin) {
-    data := ds2esbus.data
+  when (ds2es_bus.ds_valid && ds2es_bus.es_allowin) {
+    data := ds2es_bus.data
   }
 
   /* Functional Part */

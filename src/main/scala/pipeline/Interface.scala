@@ -42,6 +42,7 @@ class DsToEsData extends Bundle {
 
   // inst-type
   val br_type = Output(Vec(1, Bool()))
+  val br_offset = Output(UInt(32.W))
 
   // Sram Interface
   val req_mem = Output(Bool())
@@ -51,6 +52,14 @@ class DsToEsBus extends Bundle {
   val es_allowin = Input(Bool())
   val ds_valid = Output(Bool())
   val data = new DsToEsData
+}
+
+class DsToBcData extends Bundle {
+  val pc = Output(UInt(32.W))
+}
+
+class DsToBcBus extends Bundle {
+  val data = new DsToBcData
 }
 
 // execute and memory
@@ -68,14 +77,16 @@ class EsToMsBus extends Bundle {
 }
 
 class EsToBcData extends Bundle {
-  val pc = Output(UInt(32.W))
+//  val pc = Output(UInt(32.W))
   val offset = Output(UInt(32.W))
   val cond = new Bundle() {
     val result = Output(UInt(32.W))
     val carryout = Output(Bool())
     val overflow = Output(Bool())
+    val zero = Output(Bool())
   }
   val br_type = Output(Vec(1, Bool()))
+  val valid = Output(Bool())
 }
 
 class EsToBcBus extends Bundle {
@@ -90,4 +101,14 @@ class DebugInterface extends Bundle {
 
 class ExternalInterrupt extends Bundle {
   val int = Input(UInt(6.W))
+}
+
+// Branch Control Interface
+class BcToDsBus extends Bundle {
+  val br_taken = Output(Bool())
+}
+
+class BcToFsBus extends Bundle {
+  val br_taken = Output(Bool())
+  val br_target = Output(UInt(32.W))
 }

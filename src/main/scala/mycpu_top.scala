@@ -19,12 +19,13 @@ class mycpu_top extends Module {
     val ds = Module(new Decode)
     val es = Module(new Execute)
     val ms = Module(new Memory)
+    val bc = Module(new BranchControl)
     val rf = Module(new RegFile)
 
     // Pipeline Interface
-    fs.fs2dsbus <> ds.fs2ds_bus
-    ds.ds2es_bus <> es.ds2esbus
-    es.es2msbus <> ms.es2msbus
+    fs.fs2ds_bus <> ds.fs2ds_bus
+    ds.ds2es_bus <> es.ds2es_bus
+    es.es2ms_bus <> ms.es2msbus
 
     // RegFile Interface
     ds.rf_read <> rf.read_channel
@@ -36,5 +37,11 @@ class mycpu_top extends Module {
 
     // Debug Interface
     ms.debug <> debug_wb
+
+    // Branch Control
+    bc.ds2bc_bus <> ds.ds2bc_bus
+    bc.es2bc_bus <> es.es2bc_bus
+    bc.bc2ds_bus <> ds.bc2ds_bus
+    bc.bc2fs_bus <> fs.bc2fs_bus
   }
 }
