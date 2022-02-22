@@ -9,8 +9,8 @@ class RegFile extends Module {
 
   val regs = Mem(32, UInt(32.W))
 
-  when (write_channel.wen) {
-    regs(write_channel.waddr) := write_channel.wdata
+  when (write_channel.wen.andR) {
+    regs(write_channel.wnum) := write_channel.wdata
   }
 
   for (i <- 0 to 1) {
@@ -29,7 +29,13 @@ class RFRead extends Bundle {
 }
 
 class RFWrite extends Bundle {
-  val wen = Input(Bool())
-  val waddr = Input(UInt(5.W))
+  val wen = Input(UInt(4.W))
+  val wnum = Input(UInt(5.W))
   val wdata = Input(UInt(32.W))
+}
+
+class FlippedRFWrite extends Bundle {
+  val wen = Output(UInt(4.W))
+  val wnum = Output(UInt(5.W))
+  val wdata = Output(UInt(32.W))
 }

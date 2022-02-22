@@ -1,33 +1,40 @@
 package pipeline
 
 import chisel3._
-import chisel3.stage
-import chisel3.stage.ChiselStage
 
-class InstFetch extends Module {
+class InstFetch extends Module{
   // Interface
-  val pfs2fs_bus = IO(Flipped(new PfsToFsBus))
-  val fs2ds_bus = IO(new FsToDsBus)
-  val sram_res = IO(new SramRes)
+  val fs2dsbus = IO(new FsToDsBus)
+  val inst_sram = IO(new SramInterface)
 
   // Stage Control
-  val valid = RegInit(false.B)
+  val to_fs_valid = Wire(Bool())
+  val fs_allowin = Wire(Bool())
   val fs_ready_go = Wire(Bool())
+  val valid = RegInit(false.B)
+  val next_pc = Wire(UInt(32.W))
+  val pc = RegInit(UInt(32.W), "hbfbf_fffc".U)
 
-  // Stage Register
-  val data = Reg(new PfsToFsData)
+  /* Interface */
+  fs2dsbus.fs_valid := valid && fs_ready_go
+  fs2dsbus.data.pc := pc
+  fs2dsbus.data.inst := inst_sram.rdata
 
-  pfs2fs_bus.fs_allowin := ~valid | fs_ready_go & fs2ds_bus.ds_allowin
-  fs2ds_bus.fs_valid := valid & fs_ready_go
-  fs2ds_bus.data.inst := sram_res.rdata
-  fs2ds_bus.data.pc := data.pc
+  inst_sram.en := to_fs_valid && fs_allowin
+  inst_sram.wen := 0.U
+  inst_sram.addr := next_pc
+  inst_sram.wdata := 0.U
 
+  /* Stage Control */
+  to_fs_valid := true.B
+  fs_allowin := !valid || fs_ready_go && fs2dsbus.ds_allowin
   fs_ready_go := true.B
-  when (pfs2fs_bus.fs_allowin) {
-    valid := pfs2fs_bus.pfs_valid
+  when (fs_allowin) {
+    valid := to_fs_valid
   }
 
-  when (pfs2fs_bus.pfs_valid && pfs2fs_bus.fs_allowin) {
-    data := pfs2fs_bus.data
+  next_pc := pc + 4.U
+  when (to_fs_valid && fs_allowin) {
+    pc := next_pc
   }
 }
