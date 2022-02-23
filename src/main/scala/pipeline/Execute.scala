@@ -9,6 +9,7 @@ class Execute extends Module{
   val ds2es_bus = IO(Flipped(new DsToEsBus))
   val es2ms_bus = IO(new EsToMsBus)
   val es2bc_bus = IO(new EsToBcBus)
+  val es2fp_bus = IO(new EsToFPBus)
   val data_sram_req = IO(new SramReq)
 
   // Stage Control
@@ -36,6 +37,11 @@ class Execute extends Module{
   es2bc_bus.data.br_cond.zero := alu.io.alu_zero
   es2bc_bus.data.br_type := data.br_type
   es2bc_bus.data.valid := valid
+
+  es2fp_bus.data.rf_wnum := data.rf_wnum
+  es2fp_bus.data.rf_wdata := alu.io.alu_result
+  es2fp_bus.data.addr_valid := valid && data.rf_wen
+  es2fp_bus.data.data_valid := valid && !(data.ld_st_type.asUInt.orR) && data.rf_wen
 
   data_sram_req.en := data.req_mem && valid
   data_sram_req.wen := Mux(data.ld_st_type(1), "b1111".U, 0.U)

@@ -85,7 +85,6 @@ class EsToMsBus extends Bundle {
 }
 
 class EsToBcData extends Bundle {
-//  val pc = Output(UInt(32.W))
   val br_offset = Output(UInt(32.W))
   val br_cond = new Bundle() {
     val result = Output(UInt(32.W))
@@ -99,6 +98,15 @@ class EsToBcData extends Bundle {
 
 class EsToBcBus extends Bundle {
   val data = new EsToBcData
+}
+
+class EsToFPBus extends Bundle {
+  val data = new StageToFPData
+}
+
+// memory and forward
+class MsToFPBus extends Bundle {
+  val data = new StageToFPData
 }
 
 // Debug Interface
@@ -119,4 +127,17 @@ class BcToDsBus extends Bundle {
 class BcToFsBus extends Bundle {
   val br_taken = Output(Bool())
   val br_target = Output(UInt(32.W))
+}
+
+// Forward Path Interface
+class StageToFPData extends Bundle {
+  val rf_wnum = Output(UInt(5.W))
+  val rf_wdata = Output(UInt(32.W))
+  val data_valid = Output(Bool())
+  val addr_valid = Output(Bool())
+}
+
+class DsToFPBus extends Bundle {
+  val rf_read = Flipped(new RFRead)
+  val stall = Input(Bool())
 }

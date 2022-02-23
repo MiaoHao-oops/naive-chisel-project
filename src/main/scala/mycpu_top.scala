@@ -20,15 +20,16 @@ class mycpu_top extends Module {
     val es = Module(new Execute)
     val ms = Module(new Memory)
     val bc = Module(new BranchControl)
+    val fp = Module(new ForwardPath)
     val rf = Module(new RegFile)
 
     // Pipeline Interface
     fs.fs2ds_bus <> ds.fs2ds_bus
     ds.ds2es_bus <> es.ds2es_bus
-    es.es2ms_bus <> ms.es2msbus
+    es.es2ms_bus <> ms.es2ms_bus
 
     // RegFile Interface
-    ds.rf_read <> rf.read_channel
+    fp.rf_read <> rf.read_channel
     ms.rf_write <> rf.write_channel
 
     // Sram Interface
@@ -47,5 +48,10 @@ class mycpu_top extends Module {
     bc.es2bc_bus <> es.es2bc_bus
     bc.bc2ds_bus <> ds.bc2ds_bus
     bc.bc2fs_bus <> fs.bc2fs_bus
+
+    // Forward Path
+    fp.es2fp_bus <> es.es2fp_bus
+    fp.ms2fp_bus <> ms.ms2fp_bus
+    fp.ds2fp_bus <> ds.data_fetch
   }
 }

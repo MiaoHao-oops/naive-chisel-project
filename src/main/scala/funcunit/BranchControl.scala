@@ -7,13 +7,6 @@ import pipeline._
 
 object BranchControl extends Enumeration {
   val TYPE_BEQ, TYPE_BNE, TYPE_JAL, TYPE_JR, NR_BR_INST = Value
-//  val TYPE_BEQ = 0
-//  val TYPE_BNE = 1
-
-//  val TYPE_JAL = 2
-//  val TYPE_JR  = 3
-
-//  val NR_BR_INST = 4
 }
 
 class BranchControl extends RawModule{

@@ -14,7 +14,7 @@ class Decode extends Module {
   val ds2es_bus = IO(new DsToEsBus)
   val bc2ds_bus = IO(Flipped(new BcToDsBus))
   val ds2bc_bus = IO(new DsToBcBus)
-  val rf_read = IO(Flipped(new RFRead))
+  val data_fetch = IO(new DsToFPBus)
 
   // Stage Control
   val valid = RegInit(false.B)
@@ -35,7 +35,7 @@ class Decode extends Module {
   // Operand Helper Methods
   def ITypeOp(aluop: Int): Unit = {
     ds2es_bus.data.aluop(aluop) := true.B
-    ds2es_bus.data.src(0) := rf_read.rdata(0)
+    ds2es_bus.data.src(0) := data_fetch.rf_read.rdata(0)
     ds2es_bus.data.src(1) := simm16
     ds2es_bus.data.rf_wen := true.B
     ds2es_bus.data.rf_wnum := rt
@@ -43,14 +43,14 @@ class Decode extends Module {
 
   def ITypeOp_Br(aluop: Int, br_type: Int): Unit = {
     ds2es_bus.data.aluop(aluop) := true.B
-    ds2es_bus.data.src(0) := rf_read.rdata(0)
-    ds2es_bus.data.src(1) := rf_read.rdata(1)
+    ds2es_bus.data.src(0) := data_fetch.rf_read.rdata(0)
+    ds2es_bus.data.src(1) := data_fetch.rf_read.rdata(1)
     ds2es_bus.data.br_offset := simm18
     ds2es_bus.data.br_type(br_type) := true.B
   }
 
   def ItypeOp_Ld(ld_type: Int): Unit = {
-    ds2es_bus.data.src(0) := rf_read.rdata(0)
+    ds2es_bus.data.src(0) := data_fetch.rf_read.rdata(0)
     ds2es_bus.data.src(1) := simm16
     ds2es_bus.data.rf_wen := true.B
     ds2es_bus.data.rf_wnum := rt
@@ -59,18 +59,18 @@ class Decode extends Module {
   }
 
   def ItypeOp_St(st_type: Int): Unit = {
-    ds2es_bus.data.src(0) := rf_read.rdata(0)
+    ds2es_bus.data.src(0) := data_fetch.rf_read.rdata(0)
     ds2es_bus.data.src(1) := simm16
     ds2es_bus.data.req_mem := true.B
     ds2es_bus.data.ld_st_type(st_type) := true.B
     // now br_offset is store data
-    ds2es_bus.data.br_offset := rf_read.rdata(1)
+    ds2es_bus.data.br_offset := data_fetch.rf_read.rdata(1)
   }
 
   def RTypeOp(aluop: Int): Unit = {
     ds2es_bus.data.aluop(aluop) := true.B
-    ds2es_bus.data.src(0) := rf_read.rdata(0)
-    ds2es_bus.data.src(1) := rf_read.rdata(1)
+    ds2es_bus.data.src(0) := data_fetch.rf_read.rdata(0)
+    ds2es_bus.data.src(1) := data_fetch.rf_read.rdata(1)
     ds2es_bus.data.rf_wen := true.B
     ds2es_bus.data.rf_wnum := rd
   }
@@ -78,14 +78,14 @@ class Decode extends Module {
   def RTypeOp_ShiftSa(aluop: Int): Unit = {
     ds2es_bus.data.aluop(aluop) := true.B
     ds2es_bus.data.src(0) := sa
-    ds2es_bus.data.src(1) := rf_read.rdata(1)
+    ds2es_bus.data.src(1) := data_fetch.rf_read.rdata(1)
     ds2es_bus.data.rf_wen := true.B
     ds2es_bus.data.rf_wnum := rd
   }
 
   def RTypeOp_Jr(): Unit = {
     ds2es_bus.data.br_type(TYPE_JR.id) := true.B
-    ds2es_bus.data.br_offset := rf_read.rdata(0)
+    ds2es_bus.data.br_offset := data_fetch.rf_read.rdata(0)
   }
 
   def JTypeOp_Jal(): Unit = {
@@ -125,11 +125,11 @@ class Decode extends Module {
 
   ds2bc_bus.data.pc := data.pc
 
-  rf_read.raddr(0) := rs
-  rf_read.raddr(1) := rt
+  data_fetch.rf_read.raddr(0) := rs
+  data_fetch.rf_read.raddr(1) := rt
 
   /* Stage Control Implement */
-  ds_ready_go := true.B
+  ds_ready_go := !data_fetch.stall
   when (bc2ds_bus.br_taken) {
     valid := false.B
   }.elsewhen(fs2ds_bus.ds_allowin) {
